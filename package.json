@@ -1,0 +1,22 @@
+{
+  "name": "form-submit-utils",
+  "version": "1.0.0",
+  "description": "form submit utility",
+  "main": "form-submit-utils.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wherrera/form-submit-utils.git"
+  },
+  "author": "wherrera",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wherrera/form-submit-utils/issues"
+  },
+  "homepage": "https://github.com/wherrera/form-submit-utils#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
