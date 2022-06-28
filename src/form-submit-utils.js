@@ -27,12 +27,16 @@ function form_submit_bs_modal(options)
       _alert(`cant find 'submit' button`);
     }
     function _hide_loading() {
-      modal.find('div[name="loading"]').hide();
-      modal.find('div[name="body"]').show();
+      var loading = modal.find('div[name="loading"]');
+      if(loading) { loading.hide(); }
+      var body = modal.find('div[name="body"]');
+      if(body) { body.show(); }
     }
     function _show_loading() {
-      modal.find('div[name="loading"]').show();
-      modal.find('div[name="body"]').hide();
+      var loading = modal.find('div[name="loading"]');
+      if(loading) { loading.show(); }
+      var body = modal.find('div[name="body"]');
+      if(body) { body.hide(); }
     }
     modal.on('show.bs.modal', function (event) {
         var button = event.relatedTarget;
@@ -57,19 +61,23 @@ function form_submit_bs_modal(options)
         $.ajax({
             method: "GET",
             url: form_action,
-            data: { 
+            data: {
                 "id": objectId
             }
         }).done(function( msg ) {
-            modal.find('div[name="loading"]').hide();
-            modal.find('div[name="body"]').show();
+          _hide_loading();
             Object.keys(msg).forEach(key => {
                 var _data = msg[key];
                 var _input = modal.find('[name="' + key + '"]');
-                if(_input && _data)
+                if(_input)
                 {
                   switch(_input.prop("tagName")) {
-                    case "INPUT": _input.val(_data); break;
+                    case "INPUT":     
+                    //FIXME: file types need special handler               
+                    if( _input.prop("type") != 'file' ) {
+                        _input.val(_data); 
+                    }
+                    break;
                     case "SELECT":
                       let items = _data;
                       if(!Array.isArray(items)) {
@@ -102,20 +110,33 @@ function form_submit_bs_modal(options)
         modal.find('div[name="loading"]').show();
         modal.find('div[name="body"]').hide();
         let form = modal.find("form");
-        var form_data = form.serialize();
         let form_action = form.attr('action');
-        let form_method = modal.find('form').attr('method');
-        $.ajax({
+        let form_method = form.attr('method');
+        let form_enctype = form.attr('enctype') || 'application/x-www-form-urlencoded';
+        let ajax_config = {}
+        if(form_enctype == 'multipart/form-data') {
+          ajax_config = {
             url: form_action,
-            method: form_method,              
-            data: form_data
-        })
+            type: form_method,
+            data: new FormData(form[0]),
+            processData: false,
+            contentType: false
+          }
+        }
+        else {
+          ajax_config = {
+            url: form_action,
+            type: form_method,
+            data: form.serialize()
+          }
+        }
+        $.ajax(ajax_config)
         .done(function(data, textStatus) {
             let response = data.responseJSON;
             if(response != undefined && response.message) {
                 alert(response.message);
             }
-            location.reload();
+          location.reload();
         })
         .fail(function(data) {
             let response = data.responseJSON;
